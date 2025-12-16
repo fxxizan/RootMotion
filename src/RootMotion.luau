@@ -11,18 +11,12 @@ local RunService = game:GetService("RunService")
 local ReplicatedService = game:GetService("ReplicatedStorage")
 
 local Client = PlayerService.LocalPlayer
-local Character = Client.Character or Client.CharacterAdded:Wait()
 
 local Camera = workspace.CurrentCamera
 
-local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart") :: Part
-local Head = Character:FindFirstChild("Head") :: Part
-local Humanoid = Character:FindFirstChild("Humanoid") :: Humanoid
-local Torso : Part = nil
-
 --local Remote = ReplicatedService:FindFirstChild("RootMotionEvent") :: RemoteEvent
 
-local HRPSize = HumanoidRootPart.Size
+local HRPSize = Vector3.zero
 
 local CollisionParams = RaycastParams.new()
 CollisionParams.IgnoreWater = true
@@ -54,6 +48,15 @@ local function VerifyCollision(OldCFrame : CFrame, NewCFrame : CFrame) : boolean
 end
 
 function RootMotionModule:StartCorrection(Configuration : Configuration)
+	local Character = Client.Character or Client.CharacterAdded:Wait()
+
+	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart") :: Part
+	local Head = Character:FindFirstChild("Head") :: Part
+	local Humanoid = Character:FindFirstChild("Humanoid") :: Humanoid
+	local Torso : Part = nil
+
+	HRPSize = HumanoidRootPart.Size
+
 	local Motor = nil :: Motor6D?
 
 	if Humanoid.RigType == Enum.HumanoidRigType.R15 then
@@ -161,6 +164,12 @@ function RootMotionModule:MaintainTransform(Enabled : boolean, Replicate : boole
 	if Enabled then
 		local Motor = nil :: Motor6D?
 
+		local Character = Client.Character or Client.CharacterAdded:Wait()
+
+		local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart") :: Part
+		local Humanoid = Character:FindFirstChild("Humanoid") :: Humanoid
+		local Torso : Part = nil
+
 		if Humanoid.RigType == Enum.HumanoidRigType.R15 then
 			Torso = Character:FindFirstChild("LowerTorso") :: Part
 			Motor = (Torso :: Part):FindFirstChild("Root") :: Motor6D
@@ -183,7 +192,19 @@ function RootMotionModule:MaintainTransform(Enabled : boolean, Replicate : boole
 	end
 end
 
-function RootMotionModule:DestroyDependencies(ReverseAllEffects : boolean, Replicate : boolean)    
+function RootMotionModule:DestroyDependencies(ReverseAllEffects : boolean, Replicate : boolean)  
+	local Character = Client.Character or Client.CharacterAdded:Wait()
+
+	local Head = Character:FindFirstChild("Head") :: Part
+	local Humanoid = Character:FindFirstChild("Humanoid") :: Humanoid
+	local Torso : Part = nil  
+
+	if Humanoid.RigType == Enum.HumanoidRigType.R15 then
+		Torso = Character:FindFirstChild("LowerTorso") :: Part
+	else
+		Torso = Character:FindFirstChild("Torso") :: Part
+	end		
+
 	if TemporaryParts.Connection ~= nil then
 		TemporaryParts.Connection:Disconnect()
 		TemporaryParts.Connection = nil
@@ -192,7 +213,7 @@ function RootMotionModule:DestroyDependencies(ReverseAllEffects : boolean, Repli
 	CollisionParams.FilterDescendantsInstances = {}
 	CollisionParams2.FilterDescendantsInstances = {}
 	
-	if Torso ~= nil then
+	if Torso :: Part? ~= nil then
 		Torso.Anchored = false
 	end
 	
@@ -205,7 +226,7 @@ function RootMotionModule:DestroyDependencies(ReverseAllEffects : boolean, Repli
 		Humanoid.AutoRotate = true
 		workspace.CurrentCamera.CameraSubject = Humanoid
 		
-		if Torso ~= nil then
+		if Torso :: Part? ~= nil then
 			Torso.CanCollide = true
 		end
 		
